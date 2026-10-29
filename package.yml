@@ -1,0 +1,18 @@
+package: community.lazycat.app.gitea
+version: 1.27.3
+name: Gitea
+description: Lightweight self-hosted Git service with code review, issues, wiki and CI
+min_os_version: "1.5.0"
+homepage: https://github.com/go-gitea/gitea
+author: go-gitea
+license: MIT
+permissions:
+  required:
+    - net.internet
+locales:
+  zh:
+    name: Gitea
+    description: 轻量级自托管 Git 服务：代码托管、评审、Issue、Wiki 与 CI，资源占用极低
+  en:
+    name: Gitea
+    description: Lightweight self-hosted Git service with code review, issues, wiki and CI

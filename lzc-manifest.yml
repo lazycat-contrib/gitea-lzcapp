@@ -1,0 +1,57 @@
+application:
+  subdomain: gitea
+  multi_instance: false
+  public_path:
+    - /
+  ingress:
+    - protocol: tcp
+      port: 22
+      service: gitea
+      publish_port: 2222
+  upstreams:
+    - location: /
+      backend: http://gitea:3000/
+  injects:
+    # 安装后登录页自动填充部署时创建的管理员账号
+    - id: autofill-login
+      when:
+        - /
+        - /user/login
+      do:
+        - src: builtin://simple-inject-password
+          params:
+            user: "{{ .U.admin_user }}"
+            password: "{{ .U.admin_pass }}"
+
+services:
+  gitea:
+    # upstream: docker.io/gitea/gitea:1.27.3
+    image: docker.1ms.run/gitea/gitea:1.27.3
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__server__DOMAIN={{.S.AppDomain}}
+      - GITEA__server__ROOT_URL=https://{{.S.AppDomain}}
+      - GITEA__server__HTTP_ADDR=0.0.0.0
+      - GITEA__server__HTTP_PORT=3000
+      - GITEA__server__SSH_PORT=2222
+      - GITEA__service__DISABLE_REGISTRATION=true
+      - TZ=Asia/Shanghai
+    setup_script: |
+      if ! su git -c "gitea admin user list" 2>/dev/null | grep -q "{{ .U.admin_user }}"; then
+        su git -c "gitea admin user create --username {{ .U.admin_user }} --password {{ .U.admin_pass }} --email admin@lazycat.local --admin" || true
+      fi
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:3000/api/healthz >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    binds:
+      - /lzcapp/var/data:/data
+
+usage: |
+  Gitea 是轻量级自托管 Git 服务：代码托管、Issue、PR 评审、Wiki、Actions CI。
+  管理员账号在部署时自动创建（凭据见部署参数，登录页会自动填充）。
+  已关闭注册，需要给家人开账号时用管理员进后台添加。
+  SSH 克隆端口映射为宿主 2222。

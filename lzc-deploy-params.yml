@@ -1,0 +1,23 @@
+params:
+  - id: admin_user
+    type: string
+    name: "Admin Username"
+    description: "Gitea administrator username"
+    default_value: "gitea"
+    optional: true
+
+  - id: admin_pass
+    type: secret
+    name: "Admin Password"
+    description: "Gitea administrator password (auto-generated)"
+    default_value: "$random(len=20)"
+    optional: true
+
+locales:
+  zh:
+    admin_user:
+      name: "管理员用户名"
+      description: "Gitea 管理员账号"
+    admin_pass:
+      name: "管理员密码"
+      description: "Gitea 管理员密码（自动生成）"
